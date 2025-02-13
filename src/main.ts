@@ -251,7 +251,8 @@ export default () => {
   figma.on("selectionchange", () => {
     const selectedNodes = figma.currentPage.selection;
     if (selectedNodes.length > 0) {
-      const nodeId = selectedNodes[0].id.replace(":", "-");
+      // const nodeId = selectedNodes[0].id.replace(":", "-");
+      const nodeId = selectedNodes[0].id;
       emit("NODE_SELECTED", nodeId);
     } else {
       emit("NODE_SELECTED", null);

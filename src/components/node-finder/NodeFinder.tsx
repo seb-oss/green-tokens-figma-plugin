@@ -4,19 +4,19 @@ import {
   Text,
   Button,
   Stack,
-  Textbox,
-  VerticalSpace,
   Layer,
-  IconLayerComponent16,
+  Divider,
   IconLayerFrame16,
+  VerticalSpace,
 } from "@create-figma-plugin/ui";
 import { useState } from "preact/hooks";
 
 export function NodeFinder({ node }: { node: string }) {
-  function getNode() {
-    const textToCopy = node ? `<Figma node="${node}" caption=" " />` : ``;
+  const [value, setValue] = useState<boolean>(true);
+
+  function copyToClipboard(text: string) {
     const textarea = document.createElement("textarea");
-    textarea.value = textToCopy;
+    textarea.value = text;
     document.body.appendChild(textarea);
     textarea.select();
     document.execCommand("copy");
@@ -24,34 +24,46 @@ export function NodeFinder({ node }: { node: string }) {
     emit("COPIED_TO_CLIPBOARD", node);
   }
 
-  const [value, setValue] = useState<boolean>(true);
+  function handleCopyMarkdown() {
+    const markdownText = `<Figma node="${node}" caption=" " />`;
+    copyToClipboard(markdownText);
+  }
+
+  function handleCopyJson() {
+    const jsonText = `{ "node": "${node}", "id": "_UNIQUE_ID_" }`;
+    copyToClipboard(jsonText);
+  }
+
   function handleChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const newValue = event.currentTarget.checked;
-    console.log(newValue);
     setValue(newValue);
   }
 
   return (
     <Stack space="small">
-      <VerticalSpace space="medium" />
-      <Text>Node Finder:</Text>
-      {/* <Textbox
-        spellcheck={false}
-        placeholder={node ? "" : `<Figma node="[NODE_ID]" />`}
-        value={node ? `<Figma node="${node}" caption=" " />` : ""}
-        variant="border"
-      /> */}
+      <VerticalSpace space="small" />
+      <Text>Markdown:</Text>
+      <Layer onChange={handleChange} value={value} icon={<IconLayerFrame16 />}>
+        {/* {`<Figma id="${node}" caption=" " />`} */}
+        {`<Figma id="__ID__" caption=" " />`}
+      </Layer>
+      <Button onClick={handleCopyMarkdown} secondary fullWidth>
+        Copy Markdown
+      </Button>
+      <VerticalSpace space="extraSmall" />
+      <Divider />
+      <VerticalSpace space="extraSmall" />
+      <Text>Json:</Text>
       <Layer
+        component
         onChange={handleChange}
         value={value}
-        // description={`<Figma node="${node}" caption=" " />`}
         icon={<IconLayerFrame16 />}
       >
-        {`<Figma node="${node}" caption=" " />`}
-        {/* Node: */}
+        {`{ "node": "${node}", "id": "_UNIQUE_ID_" },`}
       </Layer>
-      <Button onClick={getNode} fullWidth>
-        Copy Node
+      <Button onClick={handleCopyJson} secondary fullWidth>
+        Copy Json
       </Button>
     </Stack>
   );
