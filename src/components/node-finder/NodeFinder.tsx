@@ -30,7 +30,7 @@ export function NodeFinder({ node, layer }: { node: string; layer: string }) {
   }
 
   function handleCopyJson() {
-    const jsonText = `{ "node": "${node}", "id": "${layer}"}`;
+    const jsonText = `{ "node": "${node}", "id": "${layer}" },`;
     copyToClipboard(jsonText);
   }
 
@@ -50,16 +50,14 @@ export function NodeFinder({ node, layer }: { node: string; layer: string }) {
         Copy Markdown
       </Button>
       <VerticalSpace space="extraSmall" />
-      <Divider />
-      <VerticalSpace space="extraSmall" />
-      <Text>Json:</Text>
+      <Text>Json: {layer}</Text>
       <Layer
         component
         onChange={handleChange}
         value={value}
         icon={<IconLayerFrame16 />}
       >
-        {`{ "node": "${node}", "id": "${layer}" }`}
+        {`{ "node": "${node}", "id": "${layer}" },`}
       </Layer>
       <Button onClick={handleCopyJson} secondary fullWidth>
         Copy Json
