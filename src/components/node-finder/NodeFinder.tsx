@@ -11,7 +11,7 @@ import {
 } from "@create-figma-plugin/ui";
 import { useState } from "preact/hooks";
 
-export function NodeFinder({ node }: { node: string }) {
+export function NodeFinder({ node, layer }: { node: string; layer: string }) {
   const [value, setValue] = useState<boolean>(true);
 
   function copyToClipboard(text: string) {
@@ -21,7 +21,7 @@ export function NodeFinder({ node }: { node: string }) {
     textarea.select();
     document.execCommand("copy");
     document.body.removeChild(textarea);
-    emit("COPIED_TO_CLIPBOARD", node);
+    emit("COPIED_TO_CLIPBOARD", layer || node);
   }
 
   function handleCopyMarkdown() {
@@ -30,7 +30,7 @@ export function NodeFinder({ node }: { node: string }) {
   }
 
   function handleCopyJson() {
-    const jsonText = `{ "node": "${node}", "id": "_UNIQUE_ID_" }`;
+    const jsonText = `{ "node": "${node}", "id": "${layer}"}`;
     copyToClipboard(jsonText);
   }
 
@@ -44,8 +44,7 @@ export function NodeFinder({ node }: { node: string }) {
       <VerticalSpace space="small" />
       <Text>Markdown:</Text>
       <Layer onChange={handleChange} value={value} icon={<IconLayerFrame16 />}>
-        {/* {`<Figma id="${node}" caption=" " />`} */}
-        {`<Figma id="__ID__" caption=" " />`}
+        {`<Figma id="${layer}" />`}
       </Layer>
       <Button onClick={handleCopyMarkdown} secondary fullWidth>
         Copy Markdown
@@ -60,7 +59,7 @@ export function NodeFinder({ node }: { node: string }) {
         value={value}
         icon={<IconLayerFrame16 />}
       >
-        {`{ "node": "${node}", "id": "_UNIQUE_ID_" },`}
+        {`{ "node": "${node}", "id": "${layer}" }`}
       </Layer>
       <Button onClick={handleCopyJson} secondary fullWidth>
         Copy Json

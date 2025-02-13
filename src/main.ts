@@ -251,11 +251,15 @@ export default () => {
   figma.on("selectionchange", () => {
     const selectedNodes = figma.currentPage.selection;
     if (selectedNodes.length > 0) {
-      // const nodeId = selectedNodes[0].id.replace(":", "-");
-      const nodeId = selectedNodes[0].id;
+      const node = selectedNodes[0];
+      const nodeId = node.id;
+      console.log(node.name);
+      const layerName = node.name;
       emit("NODE_SELECTED", nodeId);
+      emit("LAYER_SELECTED", layerName);
     } else {
       emit("NODE_SELECTED", null);
+      emit("LAYER_SELECTED", null);
     }
   });
 

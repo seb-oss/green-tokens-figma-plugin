@@ -31,6 +31,7 @@ function Plugin() {
     initialState
   );
   const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const [selectedLayer, setSelectedLayer] = useState(null);
 
   useEffect(() => {
     on("SET_LOCAL_DATA", ({ localVariables, localCollections }) => {
@@ -62,15 +63,22 @@ function Plugin() {
     });
 
     on("NODE_SELECTED", (selectedNodeId) => {
-      console.log("Selected Node:", selectedNodeId);
+      // console.log("Selected Node:", selectedNodeId);
       setSelectedNodeId(selectedNodeId);
+    });
+
+    on("LAYER_SELECTED", (selectedLayer) => {
+      // console.log("Selected Node:", selectedLayer);
+      setSelectedLayer(selectedLayer);
     });
   }, []);
 
   const [tabs, setTabs] = useState<string>("Node");
   const options: Array<TabsOption> = [
     {
-      children: <NodeFinder node={selectedNodeId || ""} />,
+      children: (
+        <NodeFinder node={selectedNodeId || ""} layer={selectedLayer || ""} />
+      ),
       value: "Node",
     },
     {
