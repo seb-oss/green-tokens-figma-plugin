@@ -14,23 +14,40 @@ import { useState } from "preact/hooks";
 export function NodeFinder({ node, layer }: { node: string; layer: string }) {
   const [value, setValue] = useState<boolean>(true);
 
-  function copyToClipboard(text: string) {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textarea);
-    emit("COPIED_TO_CLIPBOARD", layer || node);
+  async function copyToClipboard(text: string) {
+    try {
+      // Use the modern clipboard API
+      await navigator.clipboard.writeText(text);
+      emit("COPIED_TO_CLIPBOARD", layer || node);
+    } catch (err) {
+      // Fallback to the older method if clipboard API fails
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed"; // Prevent scrolling to bottom
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+
+      try {
+        document.execCommand("copy");
+        emit("COPIED_TO_CLIPBOARD", layer || node);
+      } catch (e) {
+        console.error("Copy failed", e);
+      }
+
+      document.body.removeChild(textarea);
+    }
   }
 
   function handleCopyMarkdown() {
-    const markdownText = `<Figma id="${layer}" caption=" " />`;
+    // Ensure proper string escaping and formatting
+    const markdownText = `<Figma id="${layer || ""}" />`;
     copyToClipboard(markdownText);
   }
 
   function handleCopyJson() {
-    const jsonText = `{ "node": "${node}", "id": "${layer}" },`;
+    // Ensure proper string escaping and formatting
+    const jsonText = `{ "node": "${node || ""}", "id": "${layer || ""}" },`;
     copyToClipboard(jsonText);
   }
 
@@ -44,9 +61,9 @@ export function NodeFinder({ node, layer }: { node: string; layer: string }) {
       <VerticalSpace space="small" />
       <Text>Markdown:</Text>
       <Layer onChange={handleChange} value={value} icon={<IconLayerFrame16 />}>
-        {`<Figma id="${layer}" />`}
+        {`<Figma id="${layer || ""}" />`}
       </Layer>
-      <Button onClick={handleCopyMarkdown} secondary fullWidth>
+      <Button onClick={() => handleCopyMarkdown()} secondary fullWidth>
         Copy Markdown
       </Button>
       <VerticalSpace space="extraSmall" />
@@ -57,9 +74,9 @@ export function NodeFinder({ node, layer }: { node: string; layer: string }) {
         value={value}
         icon={<IconLayerFrame16 />}
       >
-        {`{ "node": "${node}", "id": "${layer}" },`}
+        {`{ "node": "${node || ""}", "id": "${layer || ""}" },`}
       </Layer>
-      <Button onClick={handleCopyJson} secondary fullWidth>
+      <Button onClick={() => handleCopyJson()} secondary fullWidth>
         Copy Json
       </Button>
     </Stack>
