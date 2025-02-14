@@ -25,7 +25,7 @@ export function NodeFinder({ node, layer }: { node: string; layer: string }) {
   }
 
   function handleCopyMarkdown() {
-    const markdownText = `<Figma node="${node}" caption=" " />`;
+    const markdownText = `<Figma id="${layer}" caption=" " />`;
     copyToClipboard(markdownText);
   }
 
