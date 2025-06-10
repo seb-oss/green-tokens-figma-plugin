@@ -1,15 +1,6 @@
 import { JSX, h } from "preact";
 import { emit } from "@create-figma-plugin/utilities";
-import {
-  Text,
-  Button,
-  Stack,
-  Textbox,
-  VerticalSpace,
-  Layer,
-  IconLayerComponent16,
-  IconLayerFrame16,
-} from "@create-figma-plugin/ui";
+import { Text, Button, Stack, Textbox, VerticalSpace, Layer, IconLayerComponent16, IconLayerFrame16 } from "@create-figma-plugin/ui";
 import { useState } from "preact/hooks";
 
 export function NodeFinder({ node }: { node: string }) {
@@ -27,7 +18,6 @@ export function NodeFinder({ node }: { node: string }) {
   const [value, setValue] = useState<boolean>(true);
   function handleChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const newValue = event.currentTarget.checked;
-    console.log(newValue);
     setValue(newValue);
   }
 

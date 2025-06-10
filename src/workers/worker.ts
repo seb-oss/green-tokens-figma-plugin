@@ -14,10 +14,11 @@ const blob = new Blob([
             if (foundVariable) {
                 variablesToBeUpdated.push({
                     ...tokens[i],
-                    id: foundVariable.id
+                    id: foundVariable.id,
+                    resolvedType: foundVariable.resolvedType,
                 });
             } else {
-                variablesToBeCreated.push(tokens[i]);
+                variablesToBeCreated.push({ name: tokens[i].name, value: tokens[i].value, resolvedType: tokens[i].type.toUpperCase() });
             }
         }
         

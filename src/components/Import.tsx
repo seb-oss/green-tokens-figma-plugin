@@ -17,22 +17,12 @@ import {
 } from "@create-figma-plugin/ui";
 import { useContext } from "preact/compat";
 import { PluginContext, PluginDispatchContext } from "../ui";
-import {
-  ImportStateComponentEnum,
-  IVariable,
-  ReducerAction,
-  Tokens,
-} from "../types";
+import { ImportStateComponentEnum, IVariable, ReducerAction, Tokens } from "../types";
 import JSX = createElement.JSX;
 import { emit, EventHandler } from "@create-figma-plugin/utilities";
 import { worker } from "../workers/worker";
 
-function handleSelectedFiles(
-  files: File[],
-  localVariables: Pick<IVariable, "id" | "name">[],
-  dispatch: (action: ReducerAction) => void,
-  importToCollection: string | null
-) {
+function handleSelectedFiles(files: File[], localVariables: Pick<IVariable, "id" | "name">[], dispatch: (action: ReducerAction) => void, importToCollection: string | null) {
   const reader = new FileReader();
   reader.readAsText(files[0]);
 
@@ -56,12 +46,8 @@ function ConfirmImport(): JSX.Element {
 
   return (
     <Stack space="medium">
-      <Text>
-        Variables that will be created ({state.variablesToCreate?.length})
-      </Text>
-      <Text>
-        Variables that will be updated ({state.variablesToUpdate?.length})
-      </Text>
+      <Text>Variables that will be created ({state.variablesToCreate?.length})</Text>
+      <Text>Variables that will be updated ({state.variablesToUpdate?.length})</Text>
       <VerticalSpace space="small" />
       <Stack space="small">
         <div>
@@ -74,6 +60,7 @@ function ConfirmImport(): JSX.Element {
                 variablesToCreate: state.variablesToCreate,
                 variablesToUpdate: state.variablesToUpdate,
                 collectionId: state.importToCollection,
+                modeId: state.importToMode,
               });
             }}
           >
@@ -119,6 +106,8 @@ function FinishedImport(): JSX.Element {
           fullWidth
           onClick={() => {
             dispatch({ type: "SET_IMPORT_STATE", importState: "ready" });
+            dispatch({ type: "SET_IMPORT_TO_COLLECTION", importToCollection: null });
+            dispatch({ type: "SET_IMPORT_TO_MODE", importToMode: null });
           }}
         >
           Import again
@@ -146,18 +135,13 @@ function ReadToImport(): JSX.Element {
   const onSelectedFiles = async (files: File[]) => {
     dispatch({ type: "SET_IMPORT_STATE", importState: "loading" });
 
-    handleSelectedFiles(
-      files,
-      state.localVariables,
-      dispatch,
-      state.importToCollection
-    );
+    handleSelectedFiles(files, state.localVariables, dispatch, state.importToCollection);
   };
 
   return (
     <Stack space="extraSmall">
       <VerticalSpace space="medium" />
-      <Text>Import into collection:</Text>
+      <Text>Select collection:</Text>
       <Dropdown
         label={"Select collection to import to"}
         placeholder="Choose collection"
@@ -171,12 +155,33 @@ function ReadToImport(): JSX.Element {
           });
         }}
       />
-      {state.importToCollection && (
-        <FileUploadDropzone
-          disabled={state.importToCollection === null}
-          acceptedFileTypes={["application/json"]}
-          onSelectedFiles={onSelectedFiles}
-        >
+      {state.importToCollection && state.localCollections && (
+        <Stack space="extraSmall">
+          <Text>Select mode:</Text>
+          <Dropdown
+            label={"Select mode to import to"}
+            placeholder="Choose collection"
+            options={
+              state.localCollections
+                .find((collection) => collection.id === state.importToCollection)
+                ?.modes.map((mode) => ({
+                  text: mode.name,
+                  value: mode.modeId,
+                })) || []
+            }
+            value={state.importToMode}
+            variant="border"
+            onChange={(event) => {
+              dispatch({
+                type: "SET_IMPORT_TO_MODE",
+                importToMode: event.currentTarget?.value,
+              });
+            }}
+          />
+        </Stack>
+      )}
+      {state.importToCollection && state.importToMode && (
+        <FileUploadDropzone disabled={state.importToCollection === null} acceptedFileTypes={["application/json"]} onSelectedFiles={onSelectedFiles}>
           <Text align="center">
             <Bold>Drop token file here to import</Bold>
           </Text>
@@ -185,34 +190,11 @@ function ReadToImport(): JSX.Element {
             <Muted>or</Muted>
           </Text>
           <VerticalSpace space="small" />
-          <FileUploadButton
-            disabled={state.importToCollection === null}
-            acceptedFileTypes={["application/json"]}
-            onSelectedFiles={onSelectedFiles}
-          >
+          <FileUploadButton disabled={state.importToCollection === null} acceptedFileTypes={["application/json"]} onSelectedFiles={onSelectedFiles}>
             Select token file to import
           </FileUploadButton>
         </FileUploadDropzone>
       )}
-    </Stack>
-  );
-}
-
-function CreateCollections() {
-  return (
-    <Stack space={"medium"}>
-      <Banner variant={"warning"} icon={<IconWarning32 />}>
-        In order for this plugin to work you need to have two collections called
-        REF and SYS
-      </Banner>
-      <Button
-        fullWidth
-        onClick={() => {
-          emit("CREATE_REF_AND_SYS_COLLECTIONS");
-        }}
-      >
-        Create collections
-      </Button>
     </Stack>
   );
 }
@@ -225,8 +207,6 @@ export const Import = (): JSX.Element => {
   });
 
   if (importState === "loading") return ImportEnum[importState];
-
-  //if (!localCollectionNames.includes("ref") && !localCollectionNames.includes("sys")) return <CreateCollections />;
 
   if (importState) return ImportEnum[importState];
 

@@ -16,7 +16,11 @@ export function pluginReducer(state: IPluginState, action: ReducerAction): IPlug
   if (action.type === "SET_LOCAL_COLLECTIONS") {
     return {
       ...state,
-      localCollections: action.localCollections,
+      localCollections: action.localCollections.map((col: any) => ({
+        ...col,
+        modes: col.modes ?? [],
+        defaultModeId: col.defaultModeId ?? "",
+      })),
     };
   }
   if (action.type === "SET_ERROR_MESSAGE") {
@@ -42,8 +46,6 @@ export function pluginReducer(state: IPluginState, action: ReducerAction): IPlug
     return state;
   }
   if (action.type === "SET_TOKENS_TO_IMPORT") {
-    console.log(action);
-
     return {
       ...state,
       variablesToCreate: action.tokens.variablesToBeCreated,
@@ -54,6 +56,12 @@ export function pluginReducer(state: IPluginState, action: ReducerAction): IPlug
     return {
       ...state,
       importToCollection: action.importToCollection,
+    };
+  }
+  if (action.type === "SET_IMPORT_TO_MODE") {
+    return {
+      ...state,
+      importToMode: action.importToMode,
     };
   }
 

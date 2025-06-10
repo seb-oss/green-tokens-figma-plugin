@@ -19,8 +19,9 @@ export interface IPluginState {
   importMode: ImportMode;
   importState: ImportState;
   localVariables: Pick<IVariable, "id" | "name">[];
-  localCollections: Pick<VariableCollection, "id" | "name">[];
+  localCollections: Pick<VariableCollection, "id" | "name" | "modes" | "defaultModeId">[];
   importToCollection: string | null;
+  importToMode: string | null;
   variablesToCreate?: Tokens;
   variablesToUpdate?: Tokens;
 }
@@ -32,7 +33,7 @@ interface SetLocalVariables {
 
 interface SetLocalCollections {
   type: "SET_LOCAL_COLLECTIONS";
-  localCollections: Pick<VariableCollection, "id" | "name">[];
+  localCollections: VariableCollection[];
 }
 
 interface ImportExportAction {
@@ -55,6 +56,11 @@ interface ImportToCollectionAction {
   importToCollection: string | null;
 }
 
+interface ImportToModeAction {
+  type: "SET_IMPORT_TO_MODE";
+  importToMode: string | null;
+}
+
 interface ErrorAction {
   type: "SET_ERROR_MESSAGE";
   errorMsg: string | null;
@@ -68,7 +74,16 @@ interface PreparedDataAction {
   };
 }
 
-export type ReducerAction = ImportExportAction | ImportModeAction | ImportStateAction | ErrorAction | PreparedDataAction | SetLocalVariables | SetLocalCollections | ImportToCollectionAction;
+export type ReducerAction =
+  | ImportExportAction
+  | ImportModeAction
+  | ImportStateAction
+  | ErrorAction
+  | PreparedDataAction
+  | SetLocalVariables
+  | SetLocalCollections
+  | ImportToCollectionAction
+  | ImportToModeAction;
 
 export interface IPluginReducerAction extends IPluginState {
   type: string;

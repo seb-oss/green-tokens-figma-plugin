@@ -7,7 +7,6 @@ import { IPluginState, ReportErrorHandler, ReducerAction } from "./types";
 import { pluginReducer } from "./reducers/plugin";
 import { Export } from "./components/Export";
 import { NodeFinder } from "./components/node-finder/NodeFinder";
-import { IMGSync } from "./components/sync-images/sync-images";
 
 const initialState: IPluginState = {
   errorMsg: null,
@@ -18,22 +17,19 @@ const initialState: IPluginState = {
   localVariables: [],
   localCollections: [],
   importToCollection: null,
+  importToMode: null,
 };
 
 export const PluginContext = createContext<IPluginState>(initialState);
-export const PluginDispatchContext = createContext<
-  (action: ReducerAction) => void
->(() => {});
+
+export const PluginDispatchContext = createContext<(action: ReducerAction) => void>(() => {});
 
 function Plugin() {
-  const [state, dispatch] = useReducer<IPluginState, ReducerAction>(
-    pluginReducer,
-    initialState
-  );
+  const [state, dispatch] = useReducer<IPluginState, ReducerAction>(pluginReducer, initialState);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
 
   useEffect(() => {
-    on("SET_LOCAL_DATA", ({ localVariables, localCollections }) => {
+    on("SET_LOCAL_DATA", ({ localVariables, localCollections }: any) => {
       dispatch({ type: "SET_LOCAL_VARIABLES", localVariables });
       dispatch({ type: "SET_LOCAL_COLLECTIONS", localCollections });
       dispatch({ type: "SET_IMPORT_STATE", importState: "ready" });
@@ -62,12 +58,16 @@ function Plugin() {
     });
 
     on("NODE_SELECTED", (selectedNodeId) => {
-      console.log("Selected Node:", selectedNodeId);
       setSelectedNodeId(selectedNodeId);
+    });
+
+    on("IMPORT_FAILED", (errorMessage) => {
+      dispatch({ type: "SET_ERROR_MESSAGE", errorMsg: errorMessage });
     });
   }, []);
 
   const [tabs, setTabs] = useState<string>("Node");
+
   const options: Array<TabsOption> = [
     {
       children: <NodeFinder node={selectedNodeId || ""} />,
@@ -80,10 +80,6 @@ function Plugin() {
     {
       children: <Export />,
       value: "Export",
-    },
-    {
-      children: <IMGSync />,
-      value: "Sync",
     },
   ];
 
