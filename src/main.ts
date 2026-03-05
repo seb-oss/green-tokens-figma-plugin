@@ -17,7 +17,7 @@ async function getLocalData() {
           id: variable.id,
           name: variable.name,
           collectionId: variable.variableCollectionId,
-        }))
+        })),
       ),
     localCollections: figma.variables
       .getLocalVariableCollections()
@@ -83,7 +83,7 @@ export default () => {
           const createdVariable = figma.variables.createVariable(
             token.name,
             variableCollection,
-            token.type.toUpperCase()
+            token.type.toUpperCase(),
           );
 
           if (createdVariable.resolvedType === "COLOR") {
@@ -99,19 +99,19 @@ export default () => {
             if (lightModeId && token.value) {
               createdVariable.setValueForMode(
                 lightModeId,
-                hexToFigmaColor(token.value)
+                hexToFigmaColor(token.value),
               );
             }
             if (darkModeId) {
               if (token.darkValue) {
                 createdVariable.setValueForMode(
                   darkModeId,
-                  hexToFigmaColor(token.darkValue)
+                  hexToFigmaColor(token.darkValue),
                 );
               } else {
                 createdVariable.setValueForMode(
                   darkModeId,
-                  hexToFigmaColor(token.value)
+                  hexToFigmaColor(token.value),
                 );
               }
             }
@@ -125,7 +125,7 @@ export default () => {
             if (standardModeId && token.value) {
               createdVariable.setValueForMode(
                 standardModeId,
-                parseFloat(token.value)
+                parseFloat(token.value),
               );
             }
 
@@ -135,7 +135,7 @@ export default () => {
               }
               createdVariable.setValueForMode(
                 compactModeId,
-                parseFloat(token.compactValue)
+                parseFloat(token.compactValue),
               );
             }
 
@@ -145,7 +145,7 @@ export default () => {
               }
               createdVariable.setValueForMode(
                 spaciousModeId,
-                parseFloat(token.spaciousValue)
+                parseFloat(token.spaciousValue),
               );
             }
           }
@@ -162,7 +162,7 @@ export default () => {
                   .getVariableById(variable.id)
                   ?.setValueForMode(
                     lightModeId,
-                    hexToFigmaColor(variable.value)
+                    hexToFigmaColor(variable.value),
                   );
               }
               if (darkModeId && variable.darkValue) {
@@ -170,7 +170,7 @@ export default () => {
                   .getVariableById(variable.id)
                   ?.setValueForMode(
                     darkModeId,
-                    hexToFigmaColor(variable.darkValue)
+                    hexToFigmaColor(variable.darkValue),
                   );
               }
             }
@@ -186,7 +186,7 @@ export default () => {
                   .getVariableById(variable.id)
                   ?.setValueForMode(
                     compactModeId,
-                    parseFloat(variable.compactValue)
+                    parseFloat(variable.compactValue),
                   );
               }
               if (spaciousModeId && variable.spaciousValue) {
@@ -194,17 +194,17 @@ export default () => {
                   .getVariableById(variable.id)
                   ?.setValueForMode(
                     spaciousModeId,
-                    parseFloat(variable.spaciousValue)
+                    parseFloat(variable.spaciousValue),
                   );
               }
 
               if (!standardModeId && !compactModeId && !spaciousModeId) {
                 const currentVariable = figma.variables.getVariableById(
-                  variable.id
+                  variable.id,
                 );
                 currentVariable?.setValueForMode(
                   variableCollection.defaultModeId,
-                  parseFloat(variable.value)
+                  parseFloat(variable.value),
                 );
               }
             }
@@ -215,7 +215,7 @@ export default () => {
       }
 
       emit("IMPORT_FINISHED");
-    }
+    },
   );
 
   on("EXPORT_VARIABLES", () => {
@@ -230,7 +230,7 @@ export default () => {
       name: item.name,
       id: item.id,
       variableCollection: collections.find(
-        (collection) => collection.id === item.variableCollectionId
+        (collection) => collection.id === item.variableCollectionId,
       ),
       description: item.description,
       valuesByMode: item.valuesByMode,
@@ -253,8 +253,37 @@ export default () => {
     if (selectedNodes.length > 0) {
       const node = selectedNodes[0];
       const nodeId = node.id;
-      console.log(node.name);
       const layerName = node.name;
+
+      console.log("--- Selection Change ---");
+      console.log("Node ID:", nodeId);
+      console.log("Node Name:", node.name);
+      console.log("Node Type:", node.type);
+
+      if (node.type === "INSTANCE") {
+        const instance = node as InstanceNode;
+        console.log("Main Component:", instance.mainComponent);
+        console.log("Main Component Name:", instance.mainComponent?.name);
+        console.log("Main Component ID:", instance.mainComponent?.id);
+        console.log(
+          "Main Component Parent:",
+          instance.mainComponent?.parent?.name,
+        );
+      } else if (node.type === "COMPONENT") {
+        const component = node as ComponentNode;
+        console.log("Component Name:", component.name);
+        console.log("Component ID:", component.id);
+        console.log("Component Parent:", component.parent?.name);
+      } else {
+        console.log("Not an instance or component");
+        console.log(
+          "Parent:",
+          node.parent?.name,
+          "Parent Type:",
+          node.parent?.type,
+        );
+      }
+
       emit("NODE_SELECTED", nodeId);
       emit("LAYER_SELECTED", layerName);
     } else {
